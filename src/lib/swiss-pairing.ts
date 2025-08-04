@@ -428,3 +428,105 @@ export function generateSwissPairings(participants: TournamentParticipant[], rou
   
   return pairings
 }
+
+/**
+ * Generate Round Robin pairings for a specific round
+ * Uses the circle method to ensure every player plays every other player exactly once
+ * This version works with the global Pairing interface - byes are handled as special pairings
+ */
+export function generateRoundRobinPairings(players: Player[], round: number): Pairing[] {
+  const numPlayers = players.length
+  const pairings: Pairing[] = []
+  
+  // Round robin only works properly with even number of players
+  // If odd, one player gets a bye each round
+  if (numPlayers < 2) {
+    return pairings
+  }
+
+  // Create a list of players for the circle method
+  const playerList = [...players]
+  const isOdd = numPlayers % 2 === 1
+  
+  // If odd number of players, add a dummy "bye" player
+  const byePlayer: Player = { 
+    id: 'bye', 
+    name: 'BYE', 
+    rating: 0
+  }
+  
+  if (isOdd) {
+    playerList.push(byePlayer)
+  }
+
+  const n = playerList.length
+  const roundsNeeded = n - 1
+  
+  // Validate round number
+  if (round < 1 || round > roundsNeeded) {
+    return pairings
+  }
+
+  // Generate pairings for the specific round using circle method
+  // Player 0 stays fixed, others rotate
+  let boardNumber = 1
+
+  for (let i = 1; i < n / 2 + 1; i++) {
+    // Calculate opponent positions for this round
+    let player1Index: number
+    let player2Index: number
+
+    if (i === 1) {
+      // First pairing always involves the fixed player (index 0)
+      player1Index = 0
+      player2Index = (round - 1) % (n - 1) + 1
+    } else {
+      // Calculate rotating positions for other pairings
+      const pos1 = ((round - 1) + i - 1) % (n - 1) + 1
+      const pos2 = ((round - 1) - i + 1 + (n - 1)) % (n - 1) + 1
+      player1Index = pos1
+      player2Index = pos2
+    }
+
+    const player1 = playerList[player1Index]
+    const player2 = playerList[player2Index]
+
+    // Skip if one of the players is the bye player
+    if (player1?.id === 'bye' || player2?.id === 'bye') {
+      // Create bye pairing for the real player (use bye player as opponent)
+      const realPlayer = player1?.id === 'bye' ? player2 : player1
+      if (realPlayer && realPlayer.id !== 'bye') {
+        pairings.push({
+          id: `rr_${round}_bye_${realPlayer.id}`,
+          tournamentId: '1', // Default tournament ID
+          round,
+          board: boardNumber,
+          whitePlayer: realPlayer,
+          blackPlayer: byePlayer, // Use bye player as opponent
+          confidence: 1.0,
+          reasoning: 'Round robin bye - automatic win'
+        })
+      }
+      continue
+    }
+
+    // Determine colors - alternate each round to ensure fair color distribution
+    const whitePlayer = (round + boardNumber) % 2 === 0 ? player1 : player2
+    const blackPlayer = (round + boardNumber) % 2 === 0 ? player2 : player1
+
+    pairings.push({
+      id: `rr_${round}_${boardNumber}`,
+      tournamentId: '1', // Default tournament ID
+      round,
+      board: boardNumber,
+      whitePlayer,
+      blackPlayer,
+      confidence: 1.0,
+      reasoning: `Round robin pairing - ensures all players play each other exactly once`
+    })
+
+    boardNumber++
+  }
+
+  return pairings
+}

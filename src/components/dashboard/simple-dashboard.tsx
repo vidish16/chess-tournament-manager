@@ -25,19 +25,19 @@ interface Tournament {
   currentRound: number
   format: 'swiss' | 'round-robin'
   pairings: Pairing[]
-  results: unknown[]
-  startDate: string
+  results?: unknown[]
+  startDate?: string
   endDate?: string
   timeControl: string
-  venue: string
+  venue?: string
 }
 
 interface Pairing {
   id: string
   round: number
   player1: Player
-  player2: Player | null // null for bye
-  result?: 'white' | 'black' | 'draw' | 'bye' | null
+  player2?: Player // Changed from Player | null to Player | undefined
+  result?: '1-0' | '0-1' | '1/2-1/2' // Align with tournament detail format
   boardNumber: number
 }
 
@@ -75,8 +75,8 @@ const generateSwissPairings = (players: Player[], round: number): Pairing[] => {
         id: `${round}-${boardNumber}`,
         round,
         player1: byePlayer,
-        player2: null, // No opponent
-        result: 'bye', // Automatic bye result
+        player2: undefined, // No opponent
+        result: '1-0', // Automatic bye result (automatic win)
         boardNumber: boardNumber++
       })
     }
@@ -106,7 +106,7 @@ const generateSwissPairings = (players: Player[], round: number): Pairing[] => {
         round,
         player1,
         player2,
-        result: null,
+        result: undefined,
         boardNumber: boardNumber++
       })
     }
@@ -157,9 +157,16 @@ export function SimpleDashboard() {
       score: 0, 
       winRate: 0 
     }))
-    const initialPairings = setup.format === 'swiss' 
-      ? generateSwissPairings(tournamentPlayers, 1)
-      : [] // Round robin pairings would be generated differently
+    
+    // Generate initial pairings based on format
+    let initialPairings: any[] = []
+    if (setup.format === 'swiss') {
+      initialPairings = generateSwissPairings(tournamentPlayers, 1)
+    } else if (setup.format === 'round-robin') {
+      // For round-robin, we don't pre-generate all pairings, they're generated per round
+      // This allows the system to generate them dynamically as needed
+      initialPairings = []
+    }
 
     // Give BYE players their automatic point
     const playersWithByePoints = tournamentPlayers.map(player => {

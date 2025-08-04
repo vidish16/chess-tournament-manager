@@ -12,7 +12,7 @@ interface Player {
   name: string
   rating: number
   score: number
-  gamesPlayed: number
+  gamesPlayed?: number
   winRate: number
 }
 
@@ -22,16 +22,23 @@ interface Pairing {
   player2?: Player
   result?: '1-0' | '0-1' | '1/2-1/2'
   round: number
+  boardNumber: number
 }
 
 interface Tournament {
   id: string
   name: string
+  format: 'swiss' | 'round-robin'
   rounds: number
   currentRound: number
   timeControl: string
   players: Player[]
   pairings: Pairing[]
+  status: 'setup' | 'active' | 'completed'
+  results?: unknown[]
+  startDate?: string
+  endDate?: string
+  venue?: string
 }
 
 interface TournamentDetailProps {
@@ -80,6 +87,7 @@ export function TournamentDetail({ tournament, onBack, onUpdateTournament }: Tou
 
     const pairings: Pairing[] = []
     const paired = new Set<string>()
+    let boardNumber = 1
 
     // Handle BYE first if odd number of players
     if (sortedPlayers.length % 2 === 1) {
@@ -120,7 +128,8 @@ export function TournamentDetail({ tournament, onBack, onUpdateTournament }: Tou
           player1: byePlayer, // BYE player
           player2: undefined, // No opponent
           round,
-          result: '1-0' // Auto-win for BYE
+          result: '1-0', // Auto-win for BYE
+          boardNumber: boardNumber++
         })
       }
     }
@@ -153,7 +162,8 @@ export function TournamentDetail({ tournament, onBack, onUpdateTournament }: Tou
           player1: whitePlayer,
           player2: blackPlayer,
           round,
-          result: undefined
+          result: undefined,
+          boardNumber: boardNumber
         })
       }
     }
@@ -161,12 +171,115 @@ export function TournamentDetail({ tournament, onBack, onUpdateTournament }: Tou
     return pairings
   }
 
+  const generateRoundRobinPairings = (players: Player[], round: number): Pairing[] => {
+    const numPlayers = players.length
+    const pairings: Pairing[] = []
+    
+    if (numPlayers < 2) {
+      return pairings
+    }
+
+    // Create a list of players for the circle method
+    const playerList = [...players]
+    const isOdd = numPlayers % 2 === 1
+    
+    // If odd number of players, add a dummy "bye" player
+    if (isOdd) {
+      playerList.push({ 
+        id: 'bye', 
+        name: 'BYE', 
+        rating: 0,
+        score: 0,
+        gamesPlayed: 0,
+        winRate: 0
+      })
+    }
+
+    const n = playerList.length
+    const roundsNeeded = n - 1
+    
+    // Validate round number
+    if (round < 1 || round > roundsNeeded) {
+      return pairings
+    }
+
+    // Generate pairings for the specific round using circle method
+    // Player 0 stays fixed, others rotate
+    let boardNumber = 1
+
+    for (let i = 1; i < n / 2 + 1; i++) {
+      // Calculate opponent positions for this round
+      let player1Index: number
+      let player2Index: number
+
+      if (i === 1) {
+        // First pairing always involves the fixed player (index 0)
+        player1Index = 0
+        player2Index = (round - 1) % (n - 1) + 1
+      } else {
+        // Calculate rotating positions for other pairings
+        const pos1 = ((round - 1) + i - 1) % (n - 1) + 1
+        const pos2 = ((round - 1) - i + 1 + (n - 1)) % (n - 1) + 1
+        player1Index = pos1
+        player2Index = pos2
+      }
+
+      const player1 = playerList[player1Index]
+      const player2 = playerList[player2Index]
+
+      // Skip if one of the players is the bye player
+      if (player1?.id === 'bye' || player2?.id === 'bye') {
+        // Create bye pairing for the real player
+        const realPlayer = player1?.id === 'bye' ? player2 : player1
+        if (realPlayer && realPlayer.id !== 'bye') {
+          pairings.push({
+            id: `rr_${round}_bye_${realPlayer.id}`,
+            player1: realPlayer,
+            player2: undefined, // No opponent for bye
+            round,
+            result: '1-0', // Auto-win for bye
+            boardNumber: boardNumber++
+          })
+        }
+        continue
+      }
+
+      // Determine colors - alternate each round to ensure fair color distribution
+      const whitePlayer = (round + boardNumber) % 2 === 0 ? player1 : player2
+      const blackPlayer = (round + boardNumber) % 2 === 0 ? player2 : player1
+
+      pairings.push({
+        id: `rr_${round}_${boardNumber}`,
+        player1: whitePlayer,
+        player2: blackPlayer,
+        round,
+        result: undefined,
+        boardNumber: boardNumber++
+      })
+
+      boardNumber++
+    }
+
+    return pairings
+  }
+
+  // Generate pairings based on tournament format
+  const generatePairings = (players: Player[], round: number): Pairing[] => {
+    const format = tournament.format // Now required, no need for default
+    
+    if (format === 'round-robin') {
+      return generateRoundRobinPairings(players, round)
+    } else {
+      return generateSwissPairings(players, round)
+    }
+  }
+
   const handleResultSubmit = (pairingId: string, result: '1-0' | '0-1' | '1/2-1/2') => {
     // Get current round pairings (including dynamically generated ones)
     const currentRoundPairings = tournament.pairings.filter(p => p.round === selectedRound)
     const allCurrentPairings = currentRoundPairings.length > 0 
       ? currentRoundPairings 
-      : generateSwissPairings(tournament.players, selectedRound)
+      : generatePairings(tournament.players, selectedRound)
     
     // Find the specific pairing we're updating
     const targetPairing = allCurrentPairings.find(p => p.id === pairingId)
@@ -262,7 +375,7 @@ export function TournamentDetail({ tournament, onBack, onUpdateTournament }: Tou
   const currentRoundPairings = tournament.pairings.filter(p => p.round === selectedRound)
   const unsortedDisplayPairings = currentRoundPairings.length > 0 
     ? currentRoundPairings 
-    : generateSwissPairings(tournament.players, selectedRound)
+    : generatePairings(tournament.players, selectedRound)
   
   // Sort pairings to show BYE pairings at the bottom
   const displayPairings = unsortedDisplayPairings.sort((a, b) => {
@@ -293,7 +406,7 @@ export function TournamentDetail({ tournament, onBack, onUpdateTournament }: Tou
     // Get all pairings for completed rounds
     const allPairings = completedRounds.flatMap(round => {
       const roundPairings = tournament.pairings.filter(p => p.round === round)
-      return roundPairings.length > 0 ? roundPairings : generateSwissPairings(tournament.players, round)
+      return roundPairings.length > 0 ? roundPairings : generatePairings(tournament.players, round)
     })
 
     return (
@@ -658,7 +771,7 @@ export function TournamentDetail({ tournament, onBack, onUpdateTournament }: Tou
                       {player.name}
                     </div>
                     <div className={`text-sm ${index < 3 ? 'text-white text-opacity-95 drop-shadow-sm' : 'text-gray-600'}`}>
-                      Rating: {player.rating} • Games: {player.gamesPlayed}
+                      Rating: {player.rating} • Games: {player.gamesPlayed || 0}
                     </div>
                   </div>
                 </div>

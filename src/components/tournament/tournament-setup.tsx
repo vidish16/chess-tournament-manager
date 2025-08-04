@@ -26,21 +26,36 @@ export function TournamentSetup({ playerCount, onCreateTournament, disabled }: T
     format: 'swiss',
     timeControl: '5+3'
   })
-  const [errors, setErrors] = useState({ name: '' })
+  const [errors, setErrors] = useState({ 
+    name: '',
+    rounds: '' 
+  })
 
   const maxRounds = formData.format === 'round-robin' 
-    ? playerCount - 1 
-    : Math.min(Math.ceil(Math.log2(playerCount)) + 2, 9)
+    ? playerCount - 1 + playerCount % 2
+    : Math.min(Math.ceil(Math.log2(playerCount)) + 3, 12) // More reasonable max for Swiss
 
   const validateForm = () => {
-    const newErrors = { name: '' }
+    const newErrors = { name: '', rounds: '' }
     
     if (!formData.name.trim()) {
       newErrors.name = 'Tournament name is required'
     }
+
+    // Validate rounds for Swiss system
+    if (formData.format === 'swiss') {
+      const minRounds = 1
+      const maxSwissRounds = Math.min(Math.ceil(Math.log2(playerCount)) + 3, 12)
+      
+      if (formData.rounds < minRounds) {
+        newErrors.rounds = `Minimum ${minRounds} round required`
+      } else if (formData.rounds > maxSwissRounds) {
+        newErrors.rounds = `Maximum ${maxSwissRounds} rounds allowed`
+      }
+    }
     
     setErrors(newErrors)
-    return !newErrors.name
+    return !newErrors.name && !newErrors.rounds
   }
 
   const handleSubmit = () => {
@@ -54,9 +69,16 @@ export function TournamentSetup({ playerCount, onCreateTournament, disabled }: T
 
   const getSuggestedRounds = () => {
     if (formData.format === 'round-robin') {
-      return playerCount - 1
+      return playerCount - 1 + playerCount % 2
     }
-    return Math.min(Math.ceil(Math.log2(playerCount)), 7)
+    // For Swiss system, a good rule of thumb:
+    // - Small tournaments (4-8): Math.ceil(log2(n)) rounds
+    // - Medium tournaments (8-16): Math.ceil(log2(n)) + 1 rounds  
+    // - Large tournaments (16+): Math.ceil(log2(n)) + 2 rounds
+    const baseRounds = Math.ceil(Math.log2(playerCount))
+    if (playerCount <= 8) return Math.max(3, baseRounds)
+    if (playerCount <= 16) return baseRounds + 1
+    return Math.min(baseRounds + 2, 10) // Cap at 10 rounds max
   }
 
   return (
@@ -115,7 +137,7 @@ export function TournamentSetup({ playerCount, onCreateTournament, disabled }: T
                 ...prev, 
                 format: 'swiss',
                 rounds: getSuggestedRounds()
-              }))}
+              })) && setErrors(prev => ({ ...prev, rounds: '' }))}
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -139,8 +161,8 @@ export function TournamentSetup({ playerCount, onCreateTournament, disabled }: T
               onClick={() => !disabled && playerCount <= 12 && setFormData(prev => ({ 
                 ...prev, 
                 format: 'round-robin',
-                rounds: playerCount - 1
-              }))}
+                rounds: playerCount - 1 + playerCount % 2
+              })) && setErrors(prev => ({ ...prev, rounds: '' }))}
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -164,27 +186,72 @@ export function TournamentSetup({ playerCount, onCreateTournament, disabled }: T
           <label className="block text-sm font-medium text-gray-800 mb-2">
             Number of Rounds
           </label>
-          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4">
             <input
               type="number"
               value={formData.rounds}
               onChange={(e) => {
-                const value = Math.max(1, Math.min(maxRounds, parseInt(e.target.value) || 1))
-                setFormData(prev => ({ ...prev, rounds: value }))
+              // Allow empty string for controlled input to enable backspace/delete
+              const val = e.target.value;
+              if (val === '') {
+                setFormData(prev => ({ ...prev, rounds: 1 })); // Set to min value instead of empty
+                if (errors.rounds) setErrors(prev => ({ ...prev, rounds: '' }));
+                return;
+              }
+              const inputValue = parseInt(val, 10) || 1;
+              let validatedValue = inputValue;
+
+              if (formData.format === 'swiss') {
+                const minRounds = 1;
+                const maxSwissRounds = Math.min(Math.ceil(Math.log2(playerCount)) + 3, 12);
+                validatedValue = Math.max(minRounds, Math.min(maxSwissRounds, inputValue));
+              } else {
+                validatedValue = playerCount - 1 + playerCount % 2; // Round-robin is fixed
+              }
+
+              setFormData(prev => ({ ...prev, rounds: validatedValue }));
+
+              // Clear rounds error when user types
+              if (errors.rounds) {
+                setErrors(prev => ({ ...prev, rounds: '' }));
+              }
               }}
-              className="w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+              onBlur={() => {
+              // Ensure valid value on blur
+              if (isNaN(formData.rounds) || formData.rounds < 1) {
+                setFormData(prev => ({
+                ...prev,
+                rounds: formData.format === 'round-robin'
+                  ? playerCount - 1 + playerCount % 2
+                  : getSuggestedRounds()
+                }));
+              }
+              }}
+              className={`w-24 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 ${
+              errors.rounds ? 'border-red-300' : 'border-gray-300'
+              }`}
               min="1"
               max={maxRounds}
               disabled={disabled || formData.format === 'round-robin'}
+              inputMode="numeric"
+              pattern="[0-9]*"
             />
             <div className="text-sm text-gray-600">
               {formData.format === 'round-robin' ? (
-                <span>Fixed at {playerCount - 1} rounds (everyone plays everyone)</span>
+              <span>Fixed at {playerCount - 1 + playerCount % 2} rounds (everyone plays everyone)</span>
               ) : (
-                <span>Suggested: {getSuggestedRounds()} rounds (max {maxRounds})</span>
+              <div>
+                <span>Recommended: {getSuggestedRounds()} rounds (range: 1-{maxRounds})</span>
+                <div className="text-xs text-gray-500 mt-1">
+                {playerCount <= 8 && 'Small tournament: 3-5 rounds optimal'}
+                {playerCount > 8 && playerCount <= 16 && 'Medium tournament: 4-6 rounds optimal'}
+                {playerCount > 16 && 'Large tournament: 6-10 rounds optimal'}
+                </div>
+              </div>
               )}
             </div>
-          </div>
+            </div>
+          {errors.rounds && <p className="text-red-600 text-sm mt-1">{errors.rounds}</p>}
         </div>
 
         {/* Time Control */}

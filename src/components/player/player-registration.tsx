@@ -195,15 +195,18 @@ export function PlayerRegistration({ players, onAddPlayer, onEditPlayer, onDelet
                         variant="outline"
                         size="sm"
                         onClick={() => handleEdit(player)}
-                        disabled={isAdding}
+                        disabled={editingId === player.id}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => onDeletePlayer(player.id)}
-                        disabled={isAdding}
+                        onClick={() => {
+                          console.log('Delete button clicked for player:', player.name, player.id)
+                          onDeletePlayer(player.id)
+                        }}
+                        disabled={editingId === player.id}
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
                       >
                         <Trash2 className="h-4 w-4" />

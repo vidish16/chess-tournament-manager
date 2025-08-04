@@ -144,7 +144,8 @@ export function SimpleDashboard() {
   }
 
   const handleDeletePlayer = (id: string) => {
-    if (confirm('Are you sure you want to delete this player?')) {
+    const playerToDelete = players.find(p => p.id === id)
+    if (playerToDelete && window.confirm(`Are you sure you want to delete ${playerToDelete.name}?`)) {
       setPlayers(prev => prev.filter(p => p.id !== id))
     }
   }

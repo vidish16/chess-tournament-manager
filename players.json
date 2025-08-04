@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "name": "Alice Johnson",
+    "rating": 1850,
+    "color_preference": "none",
+    "previous_opponents": [],
+    "colors_played": [],
+    "score": 0.0
+  },
+  {
+    "id": 2,
+    "name": "Bob Smith",
+    "rating": 1750,
+    "color_preference": "none",
+    "previous_opponents": [],
+    "colors_played": [],
+    "score": 0.0
+  },
+  {
+    "id": 3,
+    "name": "Carol Davis",
+    "rating": 1680,
+    "color_preference": "white",
+    "previous_opponents": [],
+    "colors_played": [],
+    "score": 0.0
+  },
+  {
+    "id": 4,
+    "name": "David Wilson",
+    "rating": 1920,
+    "color_preference": "none",
+    "previous_opponents": [],
+    "colors_played": [],
+    "score": 0.0
+  },
+  {
+    "id": 5,
+    "name": "Eve Anderson",
+    "rating": 1580,
+    "color_preference": "black",
+    "previous_opponents": [],
+    "colors_played": [],
+    "score": 0.0
+  },
+  {
+    "id": 6,
+    "name": "Frank Miller",
+    "rating": 1720,
+    "color_preference": "none",
+    "previous_opponents": [],
+    "colors_played": [],
+    "score": 0.0
+  },
+  {
+    "id": 7,
+    "name": "Grace Taylor",
+    "rating": 1800,
+    "color_preference": "none",
+    "previous_opponents": [],
+    "colors_played": [],
+    "score": 0.0
+  },
+  {
+    "id": 8,
+    "name": "Henry Brown",
+    "rating": 1650,
+    "color_preference": "white",
+    "previous_opponents": [],
+    "colors_played": [],
+    "score": 0.0
+  }
+]

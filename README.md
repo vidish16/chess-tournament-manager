@@ -1,6 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chess Pairing AI
 
-## Getting Started
+**AI-based Chess Pairing Software tailored for local chess community**
+
+A modern, web-based chess tournament management system featuring intelligent Swiss pairing algorithm, interactive data visualizations, player analytics, and cost-effective API usage.
+
+## 🚀 Features
+
+- **Swiss Tournament Pairing System**: Advanced algorithm with ELO optimization and color balancing
+- **Interactive Dashboard**: Real-time tournament management with modern UI
+- **Player Analytics**: Comprehensive performance tracking with charts and statistics
+- **Data Visualization**: Interactive force-directed graphs showing player connections and match results
+- **Mobile Responsive**: Clean, professional interface optimized for all devices
+- **API Integration**: RESTful APIs for tournament, player, and pairing management
+- **Real-time Updates**: Live tournament status and rankings
+
+## 🛠 Tech Stack
+
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
+- **UI Components**: Radix UI, Framer Motion
+- **Data Visualization**: D3.js, Recharts
+- **State Management**: Zustand, React Query
+- **Database**: SQLite with Prisma (planned)
+- **AI Integration**: OpenAI API (planned)
+
+## 📦 Installation
 
 First, run the development server:
 
@@ -14,9 +37,62 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🎯 Usage
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Dashboard Overview
+- View active tournaments and player rankings
+- Monitor tournament progress and standings
+- Access player analytics and performance metrics
+
+### Tournament Management
+- Create new tournaments with Swiss system
+- Generate intelligent pairings for each round
+- Track match results and update rankings
+
+### Player Analytics
+- Rating progression charts
+- Performance vs opponent rating analysis
+- Color distribution and time management stats
+- Opening performance breakdown
+
+### API Endpoints
+
+#### Players
+- `GET /api/players` - List all players with sorting and pagination
+- `POST /api/players` - Create new player
+
+#### Tournaments  
+- `GET /api/tournaments` - List tournaments (filter by status)
+- `POST /api/tournaments` - Create new tournament
+
+#### Pairings
+- `GET /api/pairings?tournamentId=1&round=2` - Get round pairings
+- `POST /api/pairings` - Generate new round pairings
+
+## 🚧 Roadmap
+
+- [ ] Database integration with Prisma
+- [ ] OpenAI API integration for advanced pairing optimization
+- [ ] Real-time match tracking
+- [ ] Tournament bracket visualization
+- [ ] Email notifications for players
+- [ ] Export tournament reports (PDF)
+- [ ] Player authentication system
+- [ ] Mobile app companion
+
+## 📝 License
+
+MIT License - see LICENSE file for details.
+
+## 🤝 Contributing
+
+Contributions welcome! Please read our contributing guidelines before submitting PRs.
+
+---
+
+**Built for chess communities with ❤️**
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

@@ -1,0 +1,4 @@
+# No external dependencies required! 
+# Everything runs with Python standard library
+# Optional: uncomment below if you want colored terminal output
+# colorama==0.4.6

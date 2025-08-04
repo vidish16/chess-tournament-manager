@@ -24,3 +24,14 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Improved text contrast - only for specific elements */
+.chess-app table td,
+.chess-app table th {
+  color: #1f2937; /* gray-800 for better readability */
+}
+
+.chess-app label {
+  color: #374151; /* gray-700 for form labels */
+  font-weight: 500;
+}

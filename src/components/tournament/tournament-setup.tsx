@@ -20,10 +20,10 @@ interface TournamentSetupProps {
 }
 
 export function TournamentSetup({ playerCount, onCreateTournament, disabled }: TournamentSetupProps) {
-  const [formData, setFormData] = useState<TournamentSetup>({
+  const [formData, setFormData] = useState({
     name: '',
-    rounds: Math.ceil(Math.log2(playerCount)) || 5,
-    format: 'swiss',
+    rounds: String(Math.ceil(Math.log2(playerCount)) || 5),
+    format: 'swiss' as 'swiss' | 'round-robin',
     timeControl: '5+3'
   })
   const [errors, setErrors] = useState({ 
@@ -46,10 +46,11 @@ export function TournamentSetup({ playerCount, onCreateTournament, disabled }: T
     if (formData.format === 'swiss') {
       const minRounds = 1
       const maxSwissRounds = Math.min(Math.ceil(Math.log2(playerCount)) + 3, 12)
+      const rounds = parseInt(formData.rounds) || 0
       
-      if (formData.rounds < minRounds) {
+      if (rounds < minRounds) {
         newErrors.rounds = `Minimum ${minRounds} round required`
-      } else if (formData.rounds > maxSwissRounds) {
+      } else if (rounds > maxSwissRounds) {
         newErrors.rounds = `Maximum ${maxSwissRounds} rounds allowed`
       }
     }
@@ -63,7 +64,8 @@ export function TournamentSetup({ playerCount, onCreateTournament, disabled }: T
     
     onCreateTournament({
       ...formData,
-      name: formData.name.trim()
+      name: formData.name.trim(),
+      rounds: parseInt(formData.rounds) || 1
     })
   }
 
@@ -136,7 +138,7 @@ export function TournamentSetup({ playerCount, onCreateTournament, disabled }: T
               onClick={() => !disabled && setFormData(prev => ({ 
                 ...prev, 
                 format: 'swiss',
-                rounds: getSuggestedRounds()
+                rounds: String(getSuggestedRounds())
               })) && setErrors(prev => ({ ...prev, rounds: '' }))}
             >
               <div className="flex items-center justify-between">
@@ -161,7 +163,7 @@ export function TournamentSetup({ playerCount, onCreateTournament, disabled }: T
               onClick={() => !disabled && playerCount <= 12 && setFormData(prev => ({ 
                 ...prev, 
                 format: 'round-robin',
-                rounds: playerCount - 1 + playerCount % 2
+                rounds: String(playerCount - 1 + playerCount % 2)
               })) && setErrors(prev => ({ ...prev, rounds: '' }))}
             >
               <div className="flex items-center justify-between">
@@ -191,28 +193,14 @@ export function TournamentSetup({ playerCount, onCreateTournament, disabled }: T
               type="number"
               value={formData.rounds}
               onChange={(e) => {
-          // Allow empty string for controlled input to enable backspace/delete
+          // Allow free typing like rating input
           const val = e.target.value;
-          if (val === '') {
-            setFormData(prev => ({ ...prev, rounds: '' as unknown as number }));
-            if (errors.rounds) setErrors(prev => ({ ...prev, rounds: '' }));
-            return;
-          }
-          // Don't clamp here, let user type freely
-          const inputValue = parseInt(val, 10);
-          if (!isNaN(inputValue)) {
-            setFormData(prev => ({ ...prev, rounds: inputValue }));
-            if (errors.rounds) setErrors(prev => ({ ...prev, rounds: '' }));
-          }
+          setFormData(prev => ({ ...prev, rounds: val }));
+          if (errors.rounds) setErrors(prev => ({ ...prev, rounds: '' }));
               }}
               onBlur={() => {
-          // Clamp to valid range on blur
-          let value = Number(formData.rounds);
-          if (isNaN(value) || value < 1) {
-            value = formData.format === 'round-robin'
-              ? playerCount - 1 + playerCount % 2
-              : getSuggestedRounds();
-          }
+          // Validate and clamp on blur
+          let value = parseInt(formData.rounds) || 1;
           if (formData.format === 'swiss') {
             const minRounds = 1;
             const maxSwissRounds = Math.min(Math.ceil(Math.log2(playerCount)) + 3, 12);
@@ -220,7 +208,7 @@ export function TournamentSetup({ playerCount, onCreateTournament, disabled }: T
           } else {
             value = playerCount - 1 + playerCount % 2;
           }
-          setFormData(prev => ({ ...prev, rounds: value }));
+          setFormData(prev => ({ ...prev, rounds: String(value) }));
               }}
               className={`w-24 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 ${
           errors.rounds ? 'border-red-300' : 'border-gray-300'
@@ -233,16 +221,16 @@ export function TournamentSetup({ playerCount, onCreateTournament, disabled }: T
             />
             <div className="text-sm text-gray-600">
               {formData.format === 'round-robin' ? (
-          <span>Fixed at {playerCount - 1 + playerCount % 2} rounds (everyone plays everyone)</span>
+                <span>Fixed at {playerCount - 1 + playerCount % 2} rounds (everyone plays everyone)</span>
               ) : (
-          <div>
-            <span>Recommended: {getSuggestedRounds()} rounds (range: 1-{maxRounds})</span>
-            <div className="text-xs text-gray-500 mt-1">
-              {playerCount <= 8 && 'Small tournament: 3-5 rounds optimal'}
-              {playerCount > 8 && playerCount <= 16 && 'Medium tournament: 4-6 rounds optimal'}
-              {playerCount > 16 && 'Large tournament: 6-10 rounds optimal'}
-            </div>
-          </div>
+                <div>
+                  <span>Recommended: {getSuggestedRounds()} rounds (range: 1-{maxRounds})</span>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {playerCount <= 8 && 'Small tournament: 3-5 rounds optimal'}
+                    {playerCount > 8 && playerCount <= 16 && 'Medium tournament: 4-6 rounds optimal'}
+                    {playerCount > 16 && 'Large tournament: 6-10 rounds optimal'}
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -286,7 +274,7 @@ export function TournamentSetup({ playerCount, onCreateTournament, disabled }: T
             <p>• {formData.rounds} rounds</p>
             <p>• {formData.format === 'swiss' ? 'Swiss System' : 'Round Robin'} format</p>
             <p>• Time Control: {formData.timeControl}</p>
-            <p>• Approximately {formData.rounds * Math.floor(playerCount / 2)} games total</p>
+            <p>• Approximately {(parseInt(formData.rounds) || 1) * Math.floor(playerCount / 2)} games total</p>
           </div>
         </div>
 

@@ -1,112 +1,137 @@
-# Chess Pairing AI
+# Chess Tournament Manager
 
-**AI-based Chess Pairing Software tailored for local chess community**
+**Professional Chess Tournament Management System for Local Chess Communities**
 
-A modern, web-based chess tournament management system featuring intelligent Swiss pairing algorithm, interactive data visualizations, player analytics, and cost-effective API usage.
+A modern, web-based chess tournament management system featuring Swiss pairing algorithm, comprehensive player management, and intuitive tournament administration tools.
 
-## 🚀 Features
+## 🏆 Features
 
-- **Swiss Tournament Pairing System**: Advanced algorithm with ELO optimization and color balancing
-- **Interactive Dashboard**: Real-time tournament management with modern UI
-- **Player Analytics**: Comprehensive performance tracking with charts and statistics
-- **Data Visualization**: Interactive force-directed graphs showing player connections and match results
-- **Mobile Responsive**: Clean, professional interface optimized for all devices
-- **API Integration**: RESTful APIs for tournament, player, and pairing management
-- **Real-time Updates**: Live tournament status and rankings
+### Core Tournament Management
+- **Swiss Pairing System**: Automated pairing algorithm with proper BYE handling
+- **Player Registration**: Complete player management with ratings and profiles
+- **Round Management**: Easy result entry with descriptive win/loss/draw displays
+- **Automatic Progression**: Smart tournament flow from setup to completion
+- **Final Leaderboards**: Professional tournament standings and results
+
+### User Experience
+- **Clean Interface**: Modern, responsive design optimized for tournament directors
+- **Logo Integration**: Custom branding support for your chess organization
+- **Table View**: Traditional round-wise results display familiar to chess players
+- **Real-time Updates**: Live tournament status and automatic tab switching
+- **Mobile Responsive**: Works seamlessly on desktop, tablet, and mobile devices
+
+### Tournament Features
+- **Random Color Assignment**: Fair white/black distribution across rounds
+- **BYE Management**: Proper assignment to lowest-ranked players
+- **Multiple Views**: Pairings, Results, and Table views for different needs
+- **Tournament Completion**: Automatic detection and leaderboard display
+- **Result Tracking**: Complete game history and player performance
 
 ## 🛠 Tech Stack
 
-- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
-- **UI Components**: Radix UI, Framer Motion
-- **Data Visualization**: D3.js, Recharts
-- **State Management**: Zustand, React Query
-- **Database**: SQLite with Prisma (planned)
-- **AI Integration**: OpenAI API (planned)
+- **Framework**: Next.js 15.4.5 with App Router and Turbopack
+- **Language**: TypeScript for type-safe development
+- **Styling**: Tailwind CSS for modern, responsive design
+- **UI Components**: Radix UI for accessible, professional components
+- **Animations**: Framer Motion for smooth user interactions
+- **Image Optimization**: Next.js Image component for logo and assets
 
 ## 📦 Installation
 
-First, run the development server:
-
+1. **Clone the repository**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <your-repo-url>
+cd chess-tournament-manager
 ```
 
-## 🎯 Usage
+2. **Install dependencies**
+```bash
+npm install
+```
 
-### Dashboard Overview
-- View active tournaments and player rankings
-- Monitor tournament progress and standings
-- Access player analytics and performance metrics
+3. **Add your logo** (optional)
+   - Place your logo file as `public/logo.png`
+   - The system will automatically display it in the header
 
-### Tournament Management
-- Create new tournaments with Swiss system
-- Generate intelligent pairings for each round
-- Track match results and update rankings
+4. **Start the development server**
+```bash
+npm run dev
+```
 
-### Player Analytics
-- Rating progression charts
-- Performance vs opponent rating analysis
-- Color distribution and time management stats
-- Opening performance breakdown
+5. **Open your browser**
+   - Navigate to [http://localhost:3000](http://localhost:3000)
 
-### API Endpoints
+## 🎯 How to Use
 
-#### Players
-- `GET /api/players` - List all players with sorting and pagination
-- `POST /api/players` - Create new player
+### 1. Player Registration
+- Navigate to the "Players" tab
+- Add players with their names and ratings
+- Edit or remove players as needed
+- Minimum 4 players required to start a tournament
 
-#### Tournaments  
-- `GET /api/tournaments` - List tournaments (filter by status)
-- `POST /api/tournaments` - Create new tournament
+### 2. Tournament Setup
+- Go to "Setup" tab (enabled when you have 4+ players)
+- Configure tournament name, number of rounds, and time control
+- Click "Create Tournament" to begin
 
-#### Pairings
-- `GET /api/pairings?tournamentId=1&round=2` - Get round pairings
-- `POST /api/pairings` - Generate new round pairings
+### 3. Tournament Management
+- **Pairings Tab**: View current round matchups (BYE appears at top)
+- **Results Tab**: Enter match results with simple Win/Loss/Draw buttons
+- **Table View**: See traditional round-by-round results grid
+- Tournament automatically advances rounds and shows final leaderboard
 
-## 🚧 Roadmap
+### 4. Tournament Completion
+- System automatically detects when all rounds are complete
+- Switches to final leaderboard view
+- Displays complete tournament results and player standings
 
-- [ ] Database integration with Prisma
-- [ ] OpenAI API integration for advanced pairing optimization
-- [ ] Real-time match tracking
-- [ ] Tournament bracket visualization
-- [ ] Email notifications for players
-- [ ] Export tournament reports (PDF)
-- [ ] Player authentication system
-- [ ] Mobile app companion
+## 🎮 Tournament Flow
+
+1. **Player Registration** → Register all participants
+2. **Tournament Setup** → Configure rounds and time controls  
+3. **Round 1** → Automatic pairings generated
+4. **Result Entry** → Enter match outcomes
+5. **Automatic Advancement** → System moves to next round
+6. **Repeat** → Continue until all rounds complete
+7. **Final Results** → Automatic leaderboard display
+
+## 🏅 Swiss Pairing Algorithm
+
+Our implementation follows standard Swiss tournament rules:
+- Players sorted by score, then by rating
+- BYE assigned to lowest-ranked player when odd number of participants
+- Random color assignment for fair play
+- Proper score tracking and ranking
+
+## 📱 Interface Overview
+
+- **Dashboard**: Player count, tournament status, current round display
+- **Navigation**: Clean tab system for easy tournament management
+- **Visual Feedback**: Color-coded results, clear status indicators
+- **Professional Design**: Tournament director-friendly interface
+
+## 🔧 Built-in Features
+
+- ✅ Swiss pairing with BYE handling
+- ✅ Player management system
+- ✅ Random color assignment
+- ✅ Multiple result views
+- ✅ Automatic tournament progression
+- ✅ Logo integration
+- ✅ Responsive design
+- ✅ Real-time updates
+- ✅ Final leaderboards
 
 ## 📝 License
 
-MIT License - see LICENSE file for details.
+MIT License - Feel free to use for your chess community!
 
 ## 🤝 Contributing
 
-Contributions welcome! Please read our contributing guidelines before submitting PRs.
+Contributions welcome! This system is designed to help chess communities run better tournaments.
 
 ---
 
-**Built for chess communities with ❤️**
+**Built for Chess Communities with ❤️**
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Perfect for local chess clubs, schools, community centers, and tournament organizers who need a reliable, easy-to-use tournament management system.

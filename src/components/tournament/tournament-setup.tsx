@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Trophy, Settings, Play } from 'lucide-react'
+import { Trophy, Play } from 'lucide-react'
 import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

@@ -25,7 +25,7 @@ interface Tournament {
   currentRound: number
   format: 'swiss' | 'round-robin'
   pairings: Pairing[]
-  results: any[]
+  results: unknown[]
   startDate: string
   endDate?: string
   timeControl: string
@@ -108,7 +108,7 @@ export function SimpleDashboard() {
       // Tournament is complete, ensure we're on the active tab to show results
       setActiveTab('active')
     }
-  }, [currentTournament?.currentRound, currentTournament?.rounds])
+  }, [currentTournament])
 
   // Player management
   const handleAddPlayer = (playerData: { name: string; rating: number }) => {
@@ -254,7 +254,7 @@ export function SimpleDashboard() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => !tab.disabled && setActiveTab(tab.id as any)}
+                  onClick={() => !tab.disabled && setActiveTab(tab.id as 'players' | 'tournament' | 'active')}
                   disabled={tab.disabled}
                   className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                     activeTab === tab.id

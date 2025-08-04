@@ -83,17 +83,46 @@ export function TournamentDetail({ tournament, onBack, onUpdateTournament }: Tou
 
     // Handle BYE first if odd number of players
     if (sortedPlayers.length % 2 === 1) {
-      // Give BYE to the lowest-ranked player (last in sorted array)
-      const byePlayer = sortedPlayers[sortedPlayers.length - 1]
-      paired.add(byePlayer.id)
+      // Find the lowest-ranked player who hasn't had a BYE yet
+      let byePlayer = null
       
-      pairings.push({
-        id: `${round}-${byePlayer.id}-bye`,
-        player1: byePlayer, // BYE player
-        player2: undefined, // No opponent
-        round,
-        result: '1-0' // Auto-win for BYE
+      // Get all previous BYE recipients from tournament history
+      const previousByeRecipients = new Set<string>()
+      tournament.pairings.forEach(pairing => {
+        // Check for BYE pairings: no player2 OR player2 is undefined/null
+        if (!pairing.player2 || pairing.player2 === undefined || pairing.player2 === null) {
+          // This was a BYE pairing
+          previousByeRecipients.add(pairing.player1.id)
+        }
       })
+      
+      // Start from the bottom (lowest-ranked) and work upward to find someone who hasn't had a BYE
+      for (let i = sortedPlayers.length - 1; i >= 0; i--) {
+        const player = sortedPlayers[i]
+        
+        // If this player hasn't had a BYE before, give them the BYE
+        if (!previousByeRecipients.has(player.id)) {
+          byePlayer = player
+          break
+        }
+      }
+      
+      // If all players have had a BYE (very rare), give it to the lowest-ranked
+      if (!byePlayer) {
+        byePlayer = sortedPlayers[sortedPlayers.length - 1]
+      }
+      
+      if (byePlayer) {
+        paired.add(byePlayer.id)
+        
+        pairings.push({
+          id: `${round}-${byePlayer.id}-bye`,
+          player1: byePlayer, // BYE player
+          player2: undefined, // No opponent
+          round,
+          result: '1-0' // Auto-win for BYE
+        })
+      }
     }
 
     // Pair remaining players
@@ -231,9 +260,20 @@ export function TournamentDetail({ tournament, onBack, onUpdateTournament }: Tou
   }
 
   const currentRoundPairings = tournament.pairings.filter(p => p.round === selectedRound)
-  const displayPairings = currentRoundPairings.length > 0 
+  const unsortedDisplayPairings = currentRoundPairings.length > 0 
     ? currentRoundPairings 
     : generateSwissPairings(tournament.players, selectedRound)
+  
+  // Sort pairings to show BYE pairings at the bottom
+  const displayPairings = unsortedDisplayPairings.sort((a, b) => {
+    // BYE pairings (no player2) go to the bottom
+    const aIsBye = !a.player2
+    const bIsBye = !b.player2
+    
+    if (aIsBye && !bIsBye) return 1  // a goes after b
+    if (!aIsBye && bIsBye) return -1 // a goes before b
+    return 0 // keep original order for regular pairings
+  })
 
   const canEnterResults = selectedRound === tournament.currentRound
   const isRoundComplete = displayPairings.length > 0 && 

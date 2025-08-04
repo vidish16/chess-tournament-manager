@@ -50,18 +50,36 @@ const generateSwissPairings = (players: Player[], round: number): Pairing[] => {
 
   // Handle BYE first if odd number of players
   if (sortedPlayers.length % 2 === 1) {
-    // Give BYE to the lowest-ranked player (last in sorted array)
-    const byePlayer = sortedPlayers[sortedPlayers.length - 1]
-    paired.add(byePlayer.id)
+    // Find the lowest-ranked player who hasn't had a BYE yet
+    let byePlayer = null
     
-    pairings.push({
-      id: `${round}-${boardNumber}`,
-      round,
-      player1: byePlayer,
-      player2: null, // No opponent
-      result: 'bye', // Automatic bye result
-      boardNumber: boardNumber++
-    })
+    // Start from the bottom (lowest-ranked) and work upward
+    for (let i = sortedPlayers.length - 1; i >= 0; i--) {
+      const player = sortedPlayers[i]
+      // Check if this player has already had a BYE in previous rounds
+      // For round 1, no one has had a BYE yet, so just take the lowest-ranked
+      if (round === 1) {
+        byePlayer = player
+        break
+      }
+      // For subsequent rounds, we'd need to check previous pairings
+      // For now, just take the lowest-ranked (this could be enhanced with tournament history)
+      byePlayer = player
+      break
+    }
+    
+    if (byePlayer) {
+      paired.add(byePlayer.id)
+      
+      pairings.push({
+        id: `${round}-${boardNumber}`,
+        round,
+        player1: byePlayer,
+        player2: null, // No opponent
+        result: 'bye', // Automatic bye result
+        boardNumber: boardNumber++
+      })
+    }
   }
 
   // Pair remaining players

@@ -309,6 +309,29 @@ export function SimpleDashboard() {
             />
           )}
         </motion.div>
+
+        {/* Footer */}
+        <footer className="mt-16 pt-8 border-t border-gray-200">
+          <div className="text-center text-gray-600">
+            <p className="text-sm">
+              Built with ❤️ for chess communities
+            </p>
+            <p className="text-sm mt-2">
+              Connect with the developer:{" "}
+              <a 
+                href="https://github.com/vidish16" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+              >
+                @vidish16 on GitHub
+              </a>
+            </p>
+            <p className="text-xs mt-1 text-gray-500">
+              Open source • Contributions welcome
+            </p>
+          </div>
+        </footer>
       </div>
     </div>
   )

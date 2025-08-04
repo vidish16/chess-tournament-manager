@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Plus, UserPlus, Edit, Trash2, User } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -24,6 +24,7 @@ export function PlayerRegistration({ players, onAddPlayer, onEditPlayer, onDelet
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({ name: '', rating: '' })
   const [errors, setErrors] = useState({ name: '', rating: '' })
+  const nameInputRef = useRef<HTMLInputElement>(null)
 
   const validateForm = () => {
     const newErrors = { name: '', rating: '' }
@@ -39,6 +40,13 @@ export function PlayerRegistration({ players, onAddPlayer, onEditPlayer, onDelet
     
     setErrors(newErrors)
     return !newErrors.name && !newErrors.rating
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleSubmit()
+    }
   }
 
   const handleSubmit = () => {
@@ -59,6 +67,11 @@ export function PlayerRegistration({ players, onAddPlayer, onEditPlayer, onDelet
     setFormData({ name: '', rating: '' })
     // Keep form open for continuous adding
     setErrors({ name: '', rating: '' })
+    
+    // Return focus to name field
+    setTimeout(() => {
+      nameInputRef.current?.focus()
+    }, 0)
   }
 
   const handleEdit = (player: Player) => {
@@ -111,9 +124,11 @@ export function PlayerRegistration({ players, onAddPlayer, onEditPlayer, onDelet
                     Player Name *
                   </label>
                   <input
+                    ref={nameInputRef}
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    onKeyDown={handleKeyDown}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 ${
                       errors.name ? 'border-red-300' : 'border-gray-300'
                     }`}
@@ -129,6 +144,7 @@ export function PlayerRegistration({ players, onAddPlayer, onEditPlayer, onDelet
                     type="number"
                     value={formData.rating}
                     onChange={(e) => setFormData(prev => ({ ...prev, rating: e.target.value }))}
+                    onKeyDown={handleKeyDown}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 ${
                       errors.rating ? 'border-red-300' : 'border-gray-300'
                     }`}
